@@ -7,11 +7,12 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "./Base64.sol";
 import "./PunksDNA.sol";
 
-contract PlatziPunks is ERC721, ERC721Enumerable{
+contract PlatziPunks is ERC721, ERC721Enumerable, PunksDNA{
   using Counters for Counters.Counter;
 
   Counters.Counter private _idCounter;
   uint256 public maxSupply;
+  mapping(uint256 => uint256) public tokenDNA;
   
   constructor(uint256 _maxSupply) ERC721("PlatziPunks", "PLPKS"){
     maxSupply = _maxSupply;
@@ -21,8 +22,48 @@ contract PlatziPunks is ERC721, ERC721Enumerable{
     uint256 current = _idCounter.current();
     require(current < maxSupply, "No PlatziPunks left :(");
 
+    tokenDNA[current] = PunksDNA.deterministicPseudoRandom(current, msg.sender);
     _safeMint(msg.sender, current);
     _idCounter.increment();
+  }
+
+  function _baseURI() internal pure override returns(string memory){
+    return 'https://avataaars.io/';
+  }
+
+  function _paramsURI(uint256 _dna) internal view returns (string memory){
+    string memory params;
+
+    params = abi.encodePacked(
+      "accessoriesType=",
+      getAccesoriesType(_dna),
+      "&clotheColor=",
+      getClotheColor(_dna),
+      "&clotheType=",
+      getClotheType(_dna),
+      "&eyeType=",
+      getEyeType(_dna),
+      "&eyebrowType=",
+      getEyeBrowType(_dna),
+      "&facialHairColor=",
+      getFacialHairColor(_dna),
+      "&facialHairType=",
+      getFacialHairType(_dna),
+      "&hairColor=",
+      getHairColor(_dna),
+      "&hatColor=",
+      getHatColor(_dna),
+      "&graphicType=",
+      getGraphicType(_dna),
+      "&mouthType=",
+      getMouthType(_dna),
+      "&skinColor=",
+      getSkinColor(_dna),
+      "&topType",
+      getTopType(_dna)
+    );
+
+    return '';
   }
 
   function tokenURI(uint256 tokenId) public view override returns(string memory){
