@@ -34,47 +34,58 @@ contract PlatziPunks is ERC721, ERC721Enumerable, PunksDNA{
   function _paramsURI(uint256 _dna) internal view returns (string memory){
     string memory params;
 
-    params = abi.encodePacked(
-      "accessoriesType=",
-      getAccesoriesType(_dna),
-      "&clotheColor=",
-      getClotheColor(_dna),
-      "&clotheType=",
-      getClotheType(_dna),
-      "&eyeType=",
-      getEyeType(_dna),
-      "&eyebrowType=",
-      getEyeBrowType(_dna),
-      "&facialHairColor=",
-      getFacialHairColor(_dna),
-      "&facialHairType=",
-      getFacialHairType(_dna),
-      "&hairColor=",
-      getHairColor(_dna),
-      "&hatColor=",
-      getHatColor(_dna),
-      "&graphicType=",
-      getGraphicType(_dna),
-      "&mouthType=",
-      getMouthType(_dna),
-      "&skinColor=",
-      getSkinColor(_dna),
-      "&topType",
-      getTopType(_dna)
-    );
+    {
+      params = string(abi.encodePacked(
+        "accessoriesType=",
+        getAccesoriesType(_dna),
+        "&clotheColor=",
+        getClotheColor(_dna),
+        "&clotheType=",
+        getClotheType(_dna),
+        "&eyeType=",
+        getEyeType(_dna),
+        "&eyebrowType=",
+        getEyeBrowType(_dna),
+        "&facialHairColor=",
+        getFacialHairColor(_dna),
+        "&facialHairType=",
+        getFacialHairType(_dna),
+        "&hairColor=",
+        getHairColor(_dna),
+        "&hatColor=",
+        getHatColor(_dna),
+        "&graphicType=",
+        getGraphicType(_dna),
+        "&mouthType=",
+        getMouthType(_dna),
+        "&skinColor=",
+        getSkinColor(_dna)
+      ));  
+    }
 
-    return '';
+
+    return string(abi.encodePacked(params, "&topType", getTopType(_dna)));
+  }
+
+  function imageByDNA(uint256 _dna) public view returns (string memory){
+    string memory baseURI = _baseURI();
+    string memory paramsURI = _paramsURI(_dna);
+
+    return string(abi.encodePacked(baseURI,"?", paramsURI));
   }
 
   function tokenURI(uint256 tokenId) public view override returns(string memory){
     require(_exists(tokenId),"ERC721 Metadata: URI query for nonexistent token");
+
+    uint256 dna = tokenDNA[tokenId];
+    string memory image = imageByDNA(dna);
 
     string memory jsonURI = Base64.encode(
       abi.encodePacked(
         '{"name":"PlatziPunks #',
         tokenId,
         '", "description": "Platzi Punks are randomized Avatars stored on chain and It is a project to learn DApp development building", "image": "',
-        "// TODO: Calculate image URL",
+        image,
         '"}'
       )
     );
